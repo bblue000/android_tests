@@ -40,6 +40,9 @@
         <activity 
             android:name="com.example.pathdemo.CubicTestActivity"
             android:label="@string/app_name" />
+        <activity 
+            android:name="com.example.pathdemo.ComplexPathDrawingActivity"
+            android:label="@string/app_name" />
     </application>
 
 </manifest>

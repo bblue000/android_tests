@@ -78,7 +78,7 @@ public class AMainActivity extends Activity implements OnClickListener{
 			startActivity(new Intent(this, CubicTestActivity.class));
 			break;
 		case R.id.btn7:
-			startActivity(new Intent(this, RRelatedTestActivity.class));
+			startActivity(new Intent(this, ComplexPathDrawingActivity.class));
 			break;
 		case R.id.btn8:
 			startActivity(new Intent(this, RRelatedTestActivity.class));
