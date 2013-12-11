@@ -3,6 +3,7 @@ package com.example.pathdemo.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
@@ -27,8 +28,6 @@ public class ComplexDrawingView extends View {
 		@SuppressWarnings("unused")
 		public SLNode(float x, float y, SLNode next) {
 			this(x, y);
-			this.x = x;
-			this.y = y;
 			this.next = next;
 		}
 		
@@ -54,7 +53,6 @@ public class ComplexDrawingView extends View {
 	private Paint mPaint_Fill = new Paint();
 	public ComplexDrawingView(Context context) {
 		super(context);
-		
 		init();
 	}
 	
@@ -75,53 +73,46 @@ public class ComplexDrawingView extends View {
 		mPaint_Normal.setStrokeWidth(5);
 		mPaint_Normal.setColor(Color.RED);
 		
+		mPaint_Normal.setPathEffect(new CornerPathEffect(5));
+		
 		mPaint_Fill.setAntiAlias(true);
 		mPaint_Fill.setStyle(Style.FILL);
 		mPaint_Fill.setColor(0x55FFFFFF);
 	}
 	
 	@Override
-	public void draw(Canvas canvas) {
-		Log.i("yytest", "draw");
-		Log.d("yytest", "draw mStartNode: " + mStartNode);
-		super.draw(canvas);
-	}
-	
-	@Override
 	protected void onDraw(Canvas canvas) {
 		Log.i("yytest", "onDraw");
 		Log.d("yytest", "onDraw mStartNode: " + mStartNode);
-		
 		canvas.drawColor(0xFFE3A869);
-		mPath.reset();
-		// 绘制路线
-		SLNode cur = mStartNode;
-		boolean flag = true;
-		for (; null != cur;) {
-			if (flag) {
-				flag = false;
-				Log.w("yytest", "mPath.isEmpty()");
-				mPath.moveTo(cur.x, cur.y);
-			} else {
-				Log.e("yytest", "mPath.isNotEmpty()");
-				mPath.lineTo(cur.x, cur.y);
-			}
-			cur = cur.next;
+		if (mAnimating) {
+			Log.d("yytest", "onDraw is animating");
+			canvas.drawPath(mPath, mPaint_Normal);
+		} else {
+			// 绘制路线
+			rebuildPath();
+			canvas.drawPath(mPath, mIsFillingState ? mPaint_Fill : mPaint_Normal);
 		}
-		
-		if (mIsFillingState && !flag) {
-			mPath.lineTo(mStartNode.x, mStartNode.y);
-		}
-		canvas.drawPath(mPath, mIsFillingState ? mPaint_Fill : mPaint_Normal);
 	}
 	
 	private void rebuildPath() {
-		
-	}
-	
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent event) {
-		return super.dispatchTouchEvent(event);
+		if (EMPTY == mStartNode) {
+			return ;
+		}
+		mPath.reset();
+		// first point
+		mPath.moveTo(mStartNode.x, mStartNode.y);
+		SLNode tmp = mStartNode;
+		for (;;) {
+			tmp = tmp.next;
+			if (null == tmp) {
+				break;
+			}
+			mPath.lineTo(tmp.x, tmp.y);
+		}
+		if (mIsFillingState) {
+			mPath.lineTo(mStartNode.x, mStartNode.y);
+		}
 	}
 	
 	@Override
@@ -168,12 +159,48 @@ public class ComplexDrawingView extends View {
 	}
 	
 	public void clear() {
+		if (mAnimating) {
+			mAnimating = false;
+			removeCallbacks(mAnuimRun);
+			mPath.reset();
+		}
+		
 		if (mIsFillingState) {
 			mIsFillingState = false;
-			mStartNode = EMPTY;
-			
-			postInvalidate();
+		}
+		
+		mStartNode = EMPTY;
+		mPath.reset();
+		postInvalidate();
+	}
+	
+	public void repeatPath() {
+		if (EMPTY != mStartNode) {
+			mAnimating = true;
+			mPath.reset();
+			mPath.moveTo(mStartNode.x, mStartNode.y);
+			post(mAnuimRun = new RepeatPathRun());
 		}
 	}
 
+	private boolean mAnimating = false;
+	private Runnable mAnuimRun;
+	private class RepeatPathRun implements Runnable {
+		private SLNode cur;
+		public RepeatPathRun() {
+			cur = mStartNode.next;
+		}
+		
+		@Override
+		public void run() {
+			if (null == cur) {
+				invalidate();
+				return ;
+			}
+			mPath.lineTo(cur.x, cur.y);
+			invalidate();
+			cur = cur.next;
+			postDelayed(this, 50L);
+		}
+	}
 }

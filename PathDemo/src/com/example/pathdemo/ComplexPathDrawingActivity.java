@@ -16,6 +16,8 @@ public class ComplexPathDrawingActivity extends Activity {
 	ComplexDrawingView offset;
 	@ViewInject(id = R.id.btn1)
 	Button btn1;
+	@ViewInject(id = R.id.btn2)
+	Button btn2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,12 @@ public class ComplexPathDrawingActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				offset.clear();
+			}
+		});
+		btn2.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				offset.repeatPath();
 			}
 		});
 	}

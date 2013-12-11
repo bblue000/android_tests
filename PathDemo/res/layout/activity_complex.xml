@@ -7,7 +7,12 @@
         android:id="@+id/btn1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="toggle" />
+        android:text="清除点" />
+    <Button
+        android:id="@+id/btn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="重新绘制点" />
 
     <com.example.pathdemo.view.ComplexDrawingView
         android:id="@+id/complex"
