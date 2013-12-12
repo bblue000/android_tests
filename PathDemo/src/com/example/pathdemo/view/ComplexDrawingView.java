@@ -158,6 +158,11 @@ public class ComplexDrawingView extends View {
 		return true;
 	}
 	
+	@Override
+	public void computeScroll() {
+		Log.i("yytest", "computeScroll");
+	}
+	
 	public void clear() {
 		if (mAnimating) {
 			mAnimating = false;
